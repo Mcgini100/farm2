@@ -5,9 +5,10 @@ import { Send, Loader2 } from 'lucide-react';
 
 interface Props {
     onSuccess: () => void;
+    autoFocus?: boolean;
 }
 
-export const TransactionForm: React.FC<Props> = ({ onSuccess }) => {
+export const TransactionForm: React.FC<Props> = ({ onSuccess, autoFocus = false }) => {
     const [description, setDescription] = useState('');
     const [amount, setAmount] = useState('');
     const [detectedType, setDetectedType] = useState<'income' | 'expense'>('expense');
@@ -58,6 +59,7 @@ export const TransactionForm: React.FC<Props> = ({ onSuccess }) => {
                     placeholder="e.g. Sold 50 cabbages for $20"
                     className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 focus:ring-2 focus:ring-primary-500 outline-none resize-none"
                     rows={2}
+                    autoFocus={autoFocus}
                 />
             </div>
 

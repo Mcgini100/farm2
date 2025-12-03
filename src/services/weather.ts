@@ -22,8 +22,9 @@ export interface WeatherData {
 
 const CACHE_KEY = 'farm_weather_cache';
 const CACHE_DURATION = 1000 * 60 * 60 * 24 * 7; // 7 days
+const API_KEY = '8b4bb7d190d7593e9e2369d82dc13827';
 
-// Mock data generator for demo/offline fallback
+// Mock data generator for fallback
 const generateMockWeather = (): WeatherData => {
     const conditions: Array<'sunny' | 'cloudy' | 'rain' | 'storm'> = ['sunny', 'cloudy', 'rain', 'sunny', 'rain', 'cloudy', 'sunny'];
 
@@ -43,6 +44,54 @@ const generateMockWeather = (): WeatherData => {
         })),
         lastUpdated: Date.now()
     };
+};
+
+const fetchWeather = async (): Promise<WeatherData> => {
+    try {
+        // Default to Harare, Zimbabwe
+        const lat = -17.8292;
+        const lon = 31.0522;
+
+        const response = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&appid=${API_KEY}`);
+        if (!response.ok) throw new Error('Weather API failed');
+
+        const data = await response.json();
+
+        // Transform API response
+        const current = data.list[0];
+        const daily: DailyForecast[] = [];
+
+        const seenDates = new Set();
+        for (const item of data.list) {
+            const date = item.dt_txt.split(' ')[0];
+            if (!seenDates.has(date) && seenDates.size < 7) {
+                seenDates.add(date);
+                daily.push({
+                    date,
+                    temp: { min: item.main.temp_min, max: item.main.temp_max },
+                    condition: item.weather[0].main.toLowerCase().includes('rain') ? 'rain' :
+                        item.weather[0].main.toLowerCase().includes('cloud') ? 'cloudy' : 'sunny',
+                    description: item.weather[0].description,
+                    rainChance: item.pop * 100
+                });
+            }
+        }
+
+        return {
+            current: {
+                temp: current.main.temp,
+                condition: current.weather[0].main.toLowerCase().includes('rain') ? 'rain' :
+                    current.weather[0].main.toLowerCase().includes('cloud') ? 'cloudy' : 'sunny',
+                humidity: current.main.humidity,
+                windSpeed: current.wind.speed
+            },
+            daily,
+            lastUpdated: Date.now()
+        };
+    } catch (error) {
+        console.error('API Error, using mock', error);
+        return generateMockWeather();
+    }
 };
 
 export const getWeather = async (): Promise<WeatherData> => {
@@ -73,19 +122,8 @@ export const getWeather = async (): Promise<WeatherData> => {
         return data;
     } catch (error) {
         console.error('Failed to fetch weather', error);
-        // Fallback to mock if fetch fails (e.g. no API key)
         return cached ? JSON.parse(cached) : generateMockWeather();
     }
-};
-
-// Simulated API call
-const fetchWeather = async (): Promise<WeatherData> => {
-    // In a real app, fetch from OpenWeatherMap here
-    // const res = await fetch(`https://api.openweathermap.org/data/2.5/onecall?lat=...&lon=...&appid=...`);
-    // return transform(await res.json());
-
-    await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network
-    return generateMockWeather();
 };
 
 export const getFarmingRecommendation = (weather: WeatherData): string => {

@@ -5,8 +5,11 @@ import { Calendar as CalendarIcon, CheckCircle2, Plus, Trash2 } from 'lucide-rea
 import { format, isPast, isToday, isTomorrow } from 'date-fns';
 import clsx from 'clsx';
 
+import { useSearchParams } from 'react-router-dom';
+
 export const Tasks: React.FC = () => {
-    const [isAdding, setIsAdding] = useState(false);
+    const [searchParams] = useSearchParams();
+    const [isAdding, setIsAdding] = useState(searchParams.get('action') === 'add');
     const [newTaskTitle, setNewTaskTitle] = useState('');
     const [newTaskDate, setNewTaskDate] = useState(format(new Date(), 'yyyy-MM-dd'));
     const [newTaskCategory, setNewTaskCategory] = useState<'crop' | 'livestock' | 'general'>('general');

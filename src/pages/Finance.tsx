@@ -4,7 +4,12 @@ import { TransactionList } from '../components/Finance/TransactionList';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../services/db';
 
+import { useSearchParams } from 'react-router-dom';
+
 const Finance: React.FC = () => {
+    const [searchParams] = useSearchParams();
+    const shouldFocus = searchParams.get('action') === 'add';
+
     const summary = useLiveQuery(async () => {
         const txs = await db.transactions.toArray();
         const income = txs.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
@@ -38,7 +43,7 @@ const Finance: React.FC = () => {
                 </div>
             </div>
 
-            <TransactionForm onSuccess={() => { }} />
+            <TransactionForm onSuccess={() => { }} autoFocus={shouldFocus} />
 
             <TransactionList />
         </div>

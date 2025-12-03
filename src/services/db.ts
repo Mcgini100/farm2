@@ -29,10 +29,19 @@ export interface UserSettings {
     onboardingCompleted: boolean;
 }
 
+export interface MarketPrice {
+    id?: number;
+    item: string;
+    price: number;
+    unit: string;
+    lastUpdated: Date;
+}
+
 export class FarmDatabase extends Dexie {
     transactions!: Table<Transaction>;
     tasks!: Table<Task>;
     settings!: Table<UserSettings>;
+    prices!: Table<MarketPrice>;
 
     constructor() {
         super('FarmSmartDB');
@@ -40,6 +49,9 @@ export class FarmDatabase extends Dexie {
             transactions: '++id, date, type, category',
             tasks: '++id, dueDate, completed, category',
             settings: '++id' // Singleton table really
+        });
+        this.version(2).stores({
+            prices: '++id, item'
         });
     }
 }
