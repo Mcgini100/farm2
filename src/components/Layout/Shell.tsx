@@ -2,6 +2,7 @@ import React from 'react';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import { Home, Wallet, Calendar, Settings } from 'lucide-react';
 import clsx from 'clsx';
+import { InstallPrompt } from '../PWA/InstallPrompt';
 
 export const Shell: React.FC = () => {
     const location = useLocation();
@@ -52,9 +53,6 @@ export const Shell: React.FC = () => {
                         <span className="text-xs font-medium">Tasks</span>
                     </NavLink>
 
-                    {/* Weather is usually on dashboard, but maybe a dedicated tab or settings? 
-              Let's put Settings here for now, Weather can be a widget on Home.
-          */}
                     <NavLink
                         to="/settings"
                         className={({ isActive }) => clsx(
@@ -67,6 +65,7 @@ export const Shell: React.FC = () => {
                     </NavLink>
                 </div>
             </nav>
+            <InstallPrompt />
         </div>
     );
 };
